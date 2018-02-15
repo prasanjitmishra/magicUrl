@@ -1,0 +1,36 @@
+{
+  "name": "url",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "original": {
+      "type": "string",
+      "required": true
+    },
+    "shortName": {
+      "type": "string",
+      "required": true
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "updatedAt": {
+      "type": "date",
+      "required": true,
+      "default": "$now"
+    },
+    "createdAt": {
+      "type": "date",
+      "required": true,
+      "default": "$now"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -1,0 +1,16 @@
+{
+  "db": {
+    "name": "db",
+    "connector": "memory"
+  },
+  "mongoDs": {
+    "host": "",
+    "port": 0,
+    "url": "mongodb://jackman:jackman@ds135757.mlab.com:35757/develop19",
+    "database": "",
+    "password": "",
+    "name": "mongoDs",
+    "user": "",
+    "connector": "mongodb"
+  }
+}
