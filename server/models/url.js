@@ -49,14 +49,17 @@ module.exports = function(Url) {
 	 * @returns : what it returns
 	 */
 	Url.remoteMethod(
-	    'createShortUrl', {
+	    'createCustom', {
 	      http: {
 	        path: '/create',
-	        verb: 'get'
+	        verb: 'post'
 	      },
 	      accepts: [
-	        {arg: 'url', type: 'string', http: {source: 'query'}},
-	        {arg: 'active', type: 'string', http: {source: 'query'}},
+	      	{
+                    "arg": 'data',
+                    "type": 'object',
+                    "http": {source: 'body'}
+            },
 	        {arg: 'res', type: 'object', http: { source: 'res' }}
 	      ],
 	      returns: {
@@ -65,7 +68,19 @@ module.exports = function(Url) {
 	      }
 	    }
 	);
-
+	/**
+	 * this is the format of delete method
+	 */
+	Url.remoteMethod(
+    	'deleteUrl',
+    	{
+	    	accepts: [
+	        			{arg: 'shortName', type: 'string'}
+	    			],
+	        http: {path: '/delete/:shortName', verb: 'delete'},
+	        returns: {arg: 'result', type: 'string'}
+    	}
+    );
 	/**
 	 * [createShortUrl this ccreate the short url for each original URL]
 	 * @param  {[string]}   url    [original url]
@@ -74,20 +89,21 @@ module.exports = function(Url) {
 	 * @param  {Function} 	cb     [call back function]
 	 * @return {[string]}          [newly generated short url]
 	 */
-	Url.createShortUrl = function(url,active,res,cb){
+	Url.createCustom = function(data,res,cb){
 		var time = new Date().getTime()
 		var shortName = Url.toRadix(time, 36);
 		
-		console.log(res.req.headers.host);
-		var isActive = active == "true" ? false : true;
-		Url.app.models.Url.create({original:url,shortName: shortName,isActive:isActive})
-		        .then(function(url, err){
-		            if (err) {
-		                return cb(null,"not able to fetch company service :"+err);
-		            }
-		            console.log(url);
-		            return cb(null, "http://"+res.req.headers.host+"/api/urls/custom/"+url.shortName);
-		        });
+		if (data.url == undefined) {
+			return cb(null, "Please send valid URL in query params.");
+		}
+		
+		Url.app.models.Url.create({original:data.url,shortName: shortName,isActive:true})
+	        .then(function(url, err){
+	            if (err) {
+	                return cb(null,"not able to fetch company service :"+err);
+	            }
+	            return cb(null, "http://"+res.req.headers.host+"/api/urls/custom/"+url.shortName);
+	        });
 	};
 	/**
 	 * [this is the remte hook, executes after getUrl function]
@@ -120,8 +136,30 @@ module.exports = function(Url) {
 				res.end('ok');
 		  	});
 	  	}
-
 	});
+
+	/**
+	 * [deleteUrl delete a short link]
+	 * @param  {[string]}   shortName [short name of url]
+	 * @param  {Function} 	cb        [callback fun]
+	 * @return {[string]}             [responce]
+	 */
+	Url.deleteUrl = function(shortName,cb) {
+		Url.app.models.Url.updateAll(
+	                        {"shortName": shortName},
+	                        {isActive:false})
+	        .then(function(url, err){
+	            if (err) {
+	                return cb(null, err);
+	            }
+
+	            if (url.count == 0) {
+	            	return cb(null, "No such short link found.");
+	            }
+
+	            return cb(null, "Successfully deleted.");
+		});
+	}
 	
 	/**
 	 * [toRadix converts current time in milli-seconds to base 36]
