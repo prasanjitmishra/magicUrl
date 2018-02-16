@@ -1,6 +1,4 @@
 'use strict';
-// to generate random string
-// var randomstring = require("randomstring");
 
 module.exports = function(Url) {
 	
@@ -79,10 +77,7 @@ module.exports = function(Url) {
 	Url.createShortUrl = function(url,active,res,cb){
 		var time = new Date().getTime()
 		var shortName = Url.toRadix(time, 36);
-		// randomstring.generate({
-		// 								  length: 12,
-		// 								  charset: 'alphabetic'
-		// 								});
+		
 		console.log(res.req.headers.host);
 		var isActive = active == "true" ? false : true;
 		Url.app.models.Url.create({original:url,shortName: shortName,isActive:isActive})
@@ -104,7 +99,10 @@ module.exports = function(Url) {
 	  	let res = context.res;
 	  	console.log(remoteMethodOutput);
 	  	
-	  	if (remoteMethodOutput.url != null) {
+	  	if (remoteMethodOutput.url == null) {
+	  		res.send("Burn limit exceeded.");
+	  		res.end('ok');
+	  	} else {
 		 	Url.app.models.Url.updateAll(
 	                        {"id": remoteMethodOutput.id},
 	                        {isActive:false})
@@ -112,14 +110,17 @@ module.exports = function(Url) {
 		  		if(err) {
 	  				res.send("requested url not found.");	
 		  		}
-		  		res.redirect(remoteMethodOutput.url);
-	  	// 		res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-				// res.writeHead(301, { 'Location': remoteMethodOutput.url });
-				// res.end('ok');
+
+			  	if (!(remoteMethodOutput.url.indexOf("http://") > -1 || remoteMethodOutput.url.indexOf("https://") > -1)) {
+	            	remoteMethodOutput.url = "http://"+remoteMethodOutput.url;
+	            }
+
+	  			res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+				res.writeHead(301, { 'Location': remoteMethodOutput.url});
+				res.end('ok');
 		  	});
 	  	}
-	  	else
-	  		res.send("Burn limit exceeded.");
+
 	});
 	
 	/**
