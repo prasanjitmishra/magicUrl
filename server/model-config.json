@@ -38,5 +38,17 @@
   "url": {
     "dataSource": "mongoDs",
     "public": true
+  },
+  "browserstack": {
+    "dataSource": "mongoDs",
+    "public": true
+  },
+  "chrome": {
+    "dataSource": "mongoDs",
+    "public": true
+  },
+  "firefox": {
+    "dataSource": "mongoDs",
+    "public": true
   }
 }
